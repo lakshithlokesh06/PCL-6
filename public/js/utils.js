@@ -2,11 +2,11 @@
 //  FarmLink — Shared Utilities
 // ============================================================
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:3000/api';
 
 // ── Storage Keys ────────────────────────────────────────────
 const TOKEN_KEY = 'farmlink_token';
-const USER_KEY  = 'farmlink_user';
+const USER_KEY = 'farmlink_user';
 
 // ── Auth Helpers ─────────────────────────────────────────────
 function getToken() {
@@ -43,7 +43,7 @@ function logout() {
  */
 function checkAuth(requiredType = null) {
   const token = getToken();
-  const user  = getUser();
+  const user = getUser();
 
   if (!token || !user) {
     window.location.href = '/login.html';
@@ -69,7 +69,7 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
   if (body) options.body = JSON.stringify(body);
 
   try {
-    const res  = await fetch(API_BASE + endpoint, options);
+    const res = await fetch(API_BASE + endpoint, options);
     const data = await res.json();
 
     if (res.status === 401 || res.status === 403) {
@@ -96,8 +96,8 @@ function showToast(message, type = 'info', duration = 3500) {
 
   const icons = {
     success: '<i class="fa-solid fa-circle-check"></i>',
-    error:   '<i class="fa-solid fa-circle-xmark"></i>',
-    info:    '<i class="fa-solid fa-circle-info"></i>',
+    error: '<i class="fa-solid fa-circle-xmark"></i>',
+    info: '<i class="fa-solid fa-circle-info"></i>',
     warning: '<i class="fa-solid fa-triangle-exclamation"></i>'
   };
 
@@ -147,7 +147,7 @@ function cleanPhone(phone) {
 
 function openWhatsApp(phone, message = '') {
   const cleaned = cleanPhone(phone);
-  const number  = cleaned.length === 10 ? '91' + cleaned : cleaned;
+  const number = cleaned.length === 10 ? '91' + cleaned : cleaned;
   const url = message
     ? `https://wa.me/${number}?text=${encodeURIComponent(message)}`
     : `https://wa.me/${number}`;
@@ -210,7 +210,7 @@ function showContactModal({ name, phone, role, itemName }) {
     : `Hi, I found your listing on FarmLink. Can we connect?`;
 
   document.getElementById('cm-whatsapp').onclick = () => openWhatsApp(phone, waMsg);
-  document.getElementById('cm-call').onclick      = () => openPhone(phone);
+  document.getElementById('cm-call').onclick = () => openPhone(phone);
 
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -225,7 +225,7 @@ function closeContactModal() {
 // ── Navbar Mobile Toggle ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('navToggle');
-  const menu   = document.querySelector('.navbar-menu');
+  const menu = document.querySelector('.navbar-menu');
   if (toggle && menu) {
     toggle.addEventListener('click', () => menu.classList.toggle('open'));
     document.addEventListener('click', (e) => {

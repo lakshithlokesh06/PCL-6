@@ -30,10 +30,10 @@ function setupHeader(user) {
     .join('')
     .toUpperCase();
 
-  document.getElementById('navUserName').textContent   = user.full_name;
-  document.getElementById('userAvatar').textContent    = initials;
-  document.getElementById('welcomeName').textContent   = `Welcome, ${user.full_name.split(' ')[0]}!`;
-  document.getElementById('welcomeMeta').textContent   = `${user.phone} · ${user.location}`;
+  document.getElementById('navUserName').textContent = user.full_name;
+  document.getElementById('userAvatar').textContent = initials;
+  document.getElementById('welcomeName').textContent = `Welcome, ${user.full_name.split(' ')[0]}!`;
+  document.getElementById('welcomeMeta').textContent = `${user.phone} · ${user.location}`;
 }
 
 // ── Tab Switching ───────────────────────────────────────────
@@ -63,7 +63,7 @@ async function loadMyCrops() {
   const container = document.getElementById('myCropsContainer');
   container.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><p>Loading your crops…</p></div>`;
 
-  const result = await apiRequest('/my-crops');
+  const result = await apiRequest('/crops');
   if (!result || !result.ok) {
     container.innerHTML = `<div class="empty-state">
       <div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -83,7 +83,7 @@ async function loadMyCrops() {
 function renderMyCrops(crops) {
   const container = document.getElementById('myCropsContainer');
   document.getElementById('countMyCrops').textContent = crops.length;
-  document.getElementById('statMyCrops').textContent  = crops.length;
+  document.getElementById('statMyCrops').textContent = crops.length;
 
   if (crops.length === 0) {
     container.innerHTML = `
@@ -161,11 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const quantity    = document.getElementById('quantity').value.trim();
+    const quantity = document.getElementById('quantity').value.trim();
     const price_per_kg = document.getElementById('pricePerKg').value;
-    const location    = document.getElementById('cropLocation').value.trim();
-    const phone       = document.getElementById('cropPhone').value.trim();
-    const btn         = document.getElementById('submitCropBtn');
+    const location = document.getElementById('cropLocation').value.trim();
+    const phone = document.getElementById('cropPhone').value.trim();
+    const btn = document.getElementById('submitCropBtn');
 
     if (!cropName || !quantity || !price_per_kg || !location || !phone) {
       showToast('Please fill in all required fields.', 'warning');
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Crop posted successfully! Vendors can now see your listing.', 'success');
     form.reset();
     // Restore defaults
-    document.getElementById('cropPhone').value    = getUser()?.phone || '';
+    document.getElementById('cropPhone').value = getUser()?.phone || '';
     document.getElementById('cropLocation').value = getUser()?.location || '';
     togglePostForm('cropForm');
     await loadMyCrops();
@@ -197,14 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
 async function deleteCrop(id, btn) {
   if (!confirm('Remove this crop listing? This cannot be undone.')) return;
 
-  btn.disabled  = true;
+  btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const result = await apiRequest(`/crops/${id}`, 'DELETE');
 
   if (!result || !result.ok) {
     showToast(result?.data?.error || 'Failed to delete crop.', 'error');
-    btn.disabled  = false;
+    btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-trash"></i> Remove';
     return;
   }
@@ -234,7 +234,7 @@ async function loadVendorProducts() {
   }
 
   allVendorProducts = result.data.products || [];
-  document.getElementById('countProducts').textContent    = allVendorProducts.length;
+  document.getElementById('countProducts').textContent = allVendorProducts.length;
   document.getElementById('statVendorProducts').textContent = allVendorProducts.length;
   renderVendorProducts(allVendorProducts);
 }
@@ -325,7 +325,7 @@ function vendorProductCardHTML(product) {
 
 // ── Update Dashboard Counters ────────────────────────────────
 function updateCounters(myCrops, products) {
-  if (myCrops  !== null) { document.getElementById('statMyCrops').textContent     = myCrops; document.getElementById('countMyCrops').textContent = myCrops; }
+  if (myCrops !== null) { document.getElementById('statMyCrops').textContent = myCrops; document.getElementById('countMyCrops').textContent = myCrops; }
   if (products !== null) { document.getElementById('statVendorProducts').textContent = products; document.getElementById('countProducts').textContent = products; }
 }
 
