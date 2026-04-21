@@ -2,7 +2,7 @@
 //  FarmLink — Shared Utilities
 // ============================================================
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://farmlink-nht1.onrender.com/api';
 
 // ── Storage Keys ────────────────────────────────────────────
 const TOKEN_KEY = 'farmlink_token';
