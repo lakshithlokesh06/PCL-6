@@ -44,7 +44,15 @@ console.log("🔥 Pool created");
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ================= AUTH =================
@@ -130,7 +138,7 @@ app.post('/api/crops', async (req, res) => {
   try {
     await pool.query(
       `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone, farmer_name )
-       VALUES ($1,$2,$3,$4,$5)`,
+       VALUES ($1,$2,$3,$4,$5,$5)`,
       [crop_name, quantity, price_per_kg, location, phone, farmer_name]
     );
 
