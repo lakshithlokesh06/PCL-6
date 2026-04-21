@@ -172,6 +172,23 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      'DELETE FROM products WHERE id = $1',
+      [id]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
 // ================= START =================
 
 app.listen(PORT, () => {
