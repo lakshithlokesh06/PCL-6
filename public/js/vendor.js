@@ -287,7 +287,12 @@ function renderFarmerCrops(crops) {
 
 // ── Single Farmer Crop Card ──────────────────────────────────
 function farmerCropCardHTML(crop) {
-  const name = crop.farmer_name || crop.phone || "Unknown";
+  const currentUser = getUser();
+
+  const name =
+    crop.phone === currentUser.phone
+      ? "Posted by you"
+      : crop.farmer_name || crop.phone || "Unknown";
 
   return `
     <div class="listing-card card-farmer">
@@ -344,7 +349,6 @@ function farmerCropCardHTML(crop) {
       </div>
     </div>`;
 }
-
 // ── Helper: Escape HTML ──────────────────────────────────────
 function escHtml(str) {
   if (!str) return '';
