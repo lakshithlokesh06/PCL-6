@@ -274,6 +274,13 @@ function renderVendorProducts(products) {
 
 // ── Single Vendor Product Card ───────────────────────────────
 function vendorProductCardHTML(product) {
+  const currentUser = getUser();
+
+  const ownerName =
+    product.phone === currentUser.phone
+      ? "Posted by you"
+      : product.vendor_name || "Unknown Vendor";
+
   const desc = product.description
     ? `<div class="meta-row"><span class="meta-icon"><i class="fa-solid fa-file-lines"></i></span><span class="meta-label">Details</span><span class="meta-value" style="font-size:0.82rem; font-weight:400;">${escHtml(product.description.substring(0, 80))}${product.description.length > 80 ? '…' : ''}</span></div>`
     : '';
@@ -297,7 +304,7 @@ function vendorProductCardHTML(product) {
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-store"></i></span>
             <span class="meta-label">Vendor</span>
-            <span class="meta-value">${escHtml(product.vendor_name)}</span>
+            <span class="meta-value">${escHtml(ownerName)}</span>
           </div>
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-calendar-days"></i></span>
@@ -307,11 +314,11 @@ function vendorProductCardHTML(product) {
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-seller">by <strong>${escHtml(product.vendor_name)}</strong></span>
+        <span class="card-seller">by <strong>${escHtml(ownerName)}</strong></span>
         <div class="card-actions">
           <button class="btn btn-primary btn-sm"
             onclick='showContactModal({
-              name: "${escJs(product.vendor_name)}",
+              name: "${escJs(ownerName)}",
               phone: "${escJs(product.phone)}",
               role: "Vendor",
               itemName: "${escJs(product.product_name)}"
