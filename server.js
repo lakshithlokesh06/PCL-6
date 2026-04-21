@@ -110,7 +110,7 @@ app.get('/api/crops', async (req, res) => {
         users.full_name AS farmer_name
       FROM crops
       LEFT JOIN users 
-      ON TRIM(crops.phone) = TRIM(users.phone)
+      ON RIGHT(TRIM(crops.phone), 10) = RIGHT(TRIM(user.phone), 10)
       ORDER BY crops.created_at DESC
     `);
 
