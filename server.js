@@ -6,25 +6,12 @@ require('dotenv').config();
 
 console.log("🔥 STARTING SERVER FILE");
 
-console.log("Step 1");
-
 const express = require('express');
-console.log("Step 2");
-
 const bcrypt = require('bcryptjs');
-console.log("Step 3");
-
 const jwt = require('jsonwebtoken');
-console.log("Step 4");
-
 const path = require('path');
-console.log("Step 5");
-
 const cors = require('cors');
-console.log("Step 6");
-
 const { Pool } = require('pg');
-console.log("Step 7");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,7 +26,7 @@ const pool = new Pool({
     require: true,
     rejectUnauthorized: false
   },
-  connectionTimeoutMillis: 5000   // ⬅️ prevents hanging
+  connectionTimeoutMillis: 5000
 });
 
 console.log("🔥 Pool created");
@@ -114,11 +101,18 @@ app.post('/api/login', async (req, res) => {
 
 // ================= CROPS =================
 
+// ✅ FIXED: Now includes farmer name
 app.get('/api/crops', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT * FROM crops ORDER BY created_at DESC'
-    );
+    const result = await pool.query(`
+      SELECT 
+        crops.*,
+        users.full_name AS farmer_name
+      FROM crops
+      JOIN users ON crops.phone = users.phone
+      ORDER BY crops.created_at DESC
+    `);
+
     res.json({ success: true, crops: result.rows });
   } catch (err) {
     console.error(err);
