@@ -88,7 +88,7 @@ async function loadMyProducts() {
   const container = document.getElementById('myProductsContainer');
   container.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><p>Loading your products…</p></div>`;
 
-  const result = await apiRequest('/my-products');
+  const result = await apiRequest('/products');
   if (!result || !result.ok) {
     container.innerHTML = `<div class="empty-state">
       <div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
