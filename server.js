@@ -107,10 +107,13 @@ app.get('/api/crops', async (req, res) => {
     const result = await pool.query(`
       SELECT 
         crops.*,
-        users.full_name AS farmer_name
+        (
+          SELECT full_name 
+          FROM users 
+          WHERE RIGHT(TRIM(users.phone), 10) = RIGHT(TRIM(crops.phone), 10)
+          LIMIT 1
+        ) AS farmer_name
       FROM crops
-      LEFT JOIN users 
-      ON RIGHT(TRIM(crops.phone), 10) = RIGHT(TRIM(user.phone), 10)
       ORDER BY crops.created_at DESC
     `);
 
