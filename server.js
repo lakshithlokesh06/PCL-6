@@ -153,9 +153,19 @@ app.post('/api/crops', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT * FROM products ORDER BY created_at DESC'
-    );
+    const result = await pool.query(`
+      SELECT 
+        products.*,
+        (
+          SELECT full_name 
+          FROM users 
+          WHERE RIGHT(TRIM(users.phone), 10) = RIGHT(TRIM(products.phone), 10)
+          LIMIT 1
+        ) AS vendor_name
+      FROM products
+      ORDER BY products.created_at DESC
+    `);
+
     res.json({ success: true, products: result.rows });
   } catch (err) {
     console.error(err);
