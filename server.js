@@ -125,13 +125,13 @@ app.get('/api/crops', async (req, res) => {
 });
 
 app.post('/api/crops', async (req, res) => {
-  const { crop_name, quantity, price_per_kg, location, phone } = req.body;
+  const { crop_name, quantity, price_per_kg, location, phone, farmer_name } = req.body;
 
   try {
     await pool.query(
-      `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone)
+      `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone, farmer_name )
        VALUES ($1,$2,$3,$4,$5)`,
-      [crop_name, quantity, price_per_kg, location, phone]
+      [crop_name, quantity, price_per_kg, location, phone, farmer_name]
     );
 
     res.json({ success: true });
