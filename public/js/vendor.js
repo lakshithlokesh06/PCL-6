@@ -287,6 +287,8 @@ function renderFarmerCrops(crops) {
 
 // ── Single Farmer Crop Card ──────────────────────────────────
 function farmerCropCardHTML(crop) {
+  const name = crop.farmer_name || crop.phone || "Unknown";
+
   return `
     <div class="listing-card card-farmer">
       <div class="card-color-bar"></div>
@@ -297,22 +299,26 @@ function farmerCropCardHTML(crop) {
           ${formatPrice(crop.price_per_kg)}
           <span class="price-unit">/kg</span>
         </div>
+
         <div class="card-meta">
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-box"></i></span>
             <span class="meta-label">Quantity</span>
             <span class="meta-value">${escHtml(crop.quantity)}</span>
           </div>
+
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-location-dot"></i></span>
             <span class="meta-label">Location</span>
             <span class="meta-value">${escHtml(crop.location)}</span>
           </div>
+
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-tractor"></i></span>
             <span class="meta-label">Farmer</span>
-            <span class="meta-value">${escHtml(crop.farmer_name)}</span>
+            <span class="meta-value">${escHtml(name)}</span>
           </div>
+
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-calendar-days"></i></span>
             <span class="meta-label">Posted</span>
@@ -320,12 +326,14 @@ function farmerCropCardHTML(crop) {
           </div>
         </div>
       </div>
+
       <div class="card-footer">
-        <span class="card-seller">by <strong>${escHtml(crop.farmer_name)}</strong></span>
+        <span class="card-seller">by <strong>${escHtml(name)}</strong></span>
+
         <div class="card-actions">
           <button class="btn btn-primary btn-sm"
             onclick='showContactModal({
-              name: "${escJs(crop.farmer_name)}",
+              name: "${escJs(name)}",
               phone: "${escJs(crop.phone)}",
               role: "Farmer",
               itemName: "${escJs(crop.crop_name)}"
