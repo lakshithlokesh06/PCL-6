@@ -153,6 +153,23 @@ app.post('/api/crops', async (req, res) => {
   }
 });
 
+app.delete('/api/crops/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      'DELETE FROM crops WHERE id = $1',
+      [id]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
 // ================= PRODUCTS =================
 
 app.get('/api/products', async (req, res) => {
