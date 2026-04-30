@@ -2,7 +2,15 @@
 //  FarmLink — Shared Utilities
 // ============================================================
 
-const API_BASE = 'https://farmlink-nht1.onrender.com/api';
+const API_BASES = (() => {
+  const sameOriginApi = `${window.location.origin}/api`;
+  const remoteApi = 'https://farmlink-nht1.onrender.com/api';
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+  return isLocalHost
+    ? ['http://localhost:3000/api', remoteApi]
+    : [sameOriginApi, remoteApi];
+})();
 
 // ── Storage Keys ────────────────────────────────────────────
 const TOKEN_KEY = 'farmlink_token';
@@ -68,21 +76,25 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
   const options = { method, headers };
   if (body) options.body = JSON.stringify(body);
 
-  try {
-    const res = await fetch(API_BASE + endpoint, options);
-    const data = await res.json();
+  for (const baseUrl of API_BASES) {
+    try {
+      const res = await fetch(baseUrl + endpoint, options);
+      const rawText = await res.text();
+      const data = rawText ? JSON.parse(rawText) : {};
 
-    if (res.status === 401 || res.status === 403) {
-      clearAuth();
-      window.location.href = '/login.html';
-      return null;
+      if (res.status === 401 || res.status === 403) {
+        clearAuth();
+        window.location.href = '/login.html';
+        return null;
+      }
+
+      return { ok: res.ok, status: res.status, data };
+    } catch (err) {
+      console.error(`API Error (${baseUrl}${endpoint}):`, err);
     }
-
-    return { ok: res.ok, status: res.status, data };
-  } catch (err) {
-    console.error('API Error:', err);
-    return { ok: false, status: 0, data: { error: 'Network error. Please check your connection.' } };
   }
+
+  return { ok: false, status: 0, data: { error: 'Network error. Please check your connection.' } };
 }
 
 // ── Toast Notifications ───────────────────────────────────────
