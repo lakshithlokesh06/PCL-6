@@ -99,7 +99,11 @@ async function loadMyProducts() {
     return;
   }
 
-  const products = result.data.products || [];
+  const currentUser = getUser() || {};
+  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
+  const products = (result.data.products || []).filter(product =>
+    normalize(product.phone) === normalize(currentUser.phone)
+  );
   document.getElementById('countMyProducts').textContent  = products.length;
   document.getElementById('statMyProducts').textContent   = products.length;
   renderMyProducts(products);

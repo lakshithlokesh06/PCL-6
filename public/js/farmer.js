@@ -74,7 +74,11 @@ async function loadMyCrops() {
     return;
   }
 
-  const crops = result.data.crops || [];
+  const currentUser = getUser() || {};
+  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
+  const crops = (result.data.crops || []).filter(crop =>
+    normalize(crop.phone) === normalize(currentUser.phone)
+  );
   updateCounters(crops.length, null);
   renderMyCrops(crops);
 }
