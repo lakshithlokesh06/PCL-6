@@ -55,6 +55,26 @@ app.options('*', cors());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+function normalizePhone(phone) {
+  return String(phone || '').replace(/\D/g, '').slice(-10);
+}
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Invalid session' });
+  }
+}
+
 // ================= AUTH =================
 
 // Register
@@ -136,14 +156,16 @@ app.get('/api/crops', async (req, res) => {
   }
 });
 
-app.post('/api/crops', async (req, res) => {
-  const { crop_name, quantity, price_per_kg, location, phone, farmer_name } = req.body;
+app.post('/api/crops', authenticateToken, async (req, res) => {
+  const { crop_name, quantity, price_per_kg, location } = req.body;
+  const ownerPhone = req.user.phone;
+  const ownerName = req.user.full_name;
 
   try {
     await pool.query(
       `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone, farmer_name)
        VALUES ($1,$2,$3,$4,$5,$6)`,
-      [crop_name, quantity, price_per_kg, location, phone, farmer_name]
+      [crop_name, quantity, price_per_kg, location, ownerPhone, ownerName]
     );
 
     res.json({ success: true });
@@ -153,14 +175,21 @@ app.post('/api/crops', async (req, res) => {
   }
 });
 
-app.delete('/api/crops/:id', async (req, res) => {
+app.delete('/api/crops/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const ownerPhone = normalizePhone(req.user.phone);
 
-    await pool.query(
-      'DELETE FROM crops WHERE id = $1',
-      [id]
+    const result = await pool.query(
+      `DELETE FROM crops
+       WHERE id = $1
+         AND RIGHT(REGEXP_REPLACE(TRIM(phone), '\\D', '', 'g'), 10) = $2`,
+      [id, ownerPhone]
     );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({ success: false, error: 'You can only delete your own crop listings' });
+    }
 
     res.json({ success: true });
 
@@ -194,14 +223,15 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.post('/api/products', async (req, res) => {
-  const { product_name, price, description, location, phone } = req.body;
+app.post('/api/products', authenticateToken, async (req, res) => {
+  const { product_name, price, description, location } = req.body;
+  const ownerPhone = req.user.phone;
 
   try {
     await pool.query(
       `INSERT INTO products (product_name, price, description, location, phone)
        VALUES ($1,$2,$3,$4,$5)`,
-      [product_name, price, description, location, phone]
+      [product_name, price, description, location, ownerPhone]
     );
 
     res.json({ success: true });
@@ -211,14 +241,21 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const ownerPhone = normalizePhone(req.user.phone);
 
-    await pool.query(
-      'DELETE FROM products WHERE id = $1',
-      [id]
+    const result = await pool.query(
+      `DELETE FROM products
+       WHERE id = $1
+         AND RIGHT(REGEXP_REPLACE(TRIM(phone), '\\D', '', 'g'), 10) = $2`,
+      [id, ownerPhone]
     );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({ success: false, error: 'You can only delete your own product listings' });
+    }
 
     res.json({ success: true });
 

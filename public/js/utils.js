@@ -29,6 +29,15 @@ function getUser() {
   }
 }
 
+function normalizePhone(phone) {
+  return String(phone || '').replace(/\D/g, '').slice(-10);
+}
+
+function isCurrentUserOwner(itemPhone) {
+  const currentUser = getUser() || {};
+  return normalizePhone(itemPhone) === normalizePhone(currentUser.phone);
+}
+
 function setAuth(token, user) {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USER_KEY, JSON.stringify(user));

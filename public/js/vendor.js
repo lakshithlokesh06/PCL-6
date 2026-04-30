@@ -99,13 +99,10 @@ async function loadMyProducts() {
     return;
   }
 
-  const currentUser = getUser() || {};
-  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
-  const products = (result.data.products || []).filter(product =>
-    normalize(product.phone) === normalize(currentUser.phone)
-  );
-  document.getElementById('countMyProducts').textContent  = products.length;
-  document.getElementById('statMyProducts').textContent   = products.length;
+  const products = result.data.products || [];
+  const ownerProducts = products.filter(product => isCurrentUserOwner(product.phone));
+  document.getElementById('countMyProducts').textContent  = ownerProducts.length;
+  document.getElementById('statMyProducts').textContent   = ownerProducts.length;
   renderMyProducts(products);
 }
 
@@ -129,6 +126,16 @@ function renderMyProducts(products) {
 
 // ── Single My Product Card ───────────────────────────────────
 function myProductCardHTML(product) {
+  const isOwner = isCurrentUserOwner(product.phone);
+  const vendorName = isOwner ? 'Posted by you' : product.vendor_name || 'Unknown';
+  const ownerBadge = isOwner
+    ? `<span class="card-badge badge-mine"><i class="fa-solid fa-store"></i> My Listing</span>`
+    : `<span class="card-badge badge-product"><i class="fa-solid fa-store"></i> Vendor Listing</span>`;
+  const ownerActions = isOwner
+    ? `<button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id}, this)">
+            <i class="fa-solid fa-trash"></i> Remove
+          </button>`
+    : '';
   const descHTML = product.description
     ? `<div class="meta-row"><span class="meta-icon"><i class="fa-solid fa-file-lines"></i></span><span class="meta-label">Details</span><span class="meta-value" style="font-size:0.82rem; font-weight:400;">${escHtml(product.description.substring(0, 100))}${product.description.length > 100 ? '…' : ''}</span></div>`
     : '';
@@ -137,11 +144,16 @@ function myProductCardHTML(product) {
     <div class="listing-card card-my-item">
       <div class="card-color-bar"></div>
       <div class="card-body">
-        <span class="card-badge badge-mine"><i class="fa-solid fa-store"></i> My Listing</span>
+        ${ownerBadge}
         <div class="card-title">${escHtml(product.product_name)}</div>
         <div class="card-price">${formatPrice(product.price)}</div>
         <div class="card-meta">
           ${descHTML}
+          <div class="meta-row">
+            <span class="meta-icon"><i class="fa-solid fa-store"></i></span>
+            <span class="meta-label">Vendor</span>
+            <span class="meta-value">${escHtml(vendorName)}</span>
+          </div>
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-location-dot"></i></span>
             <span class="meta-label">Location</span>
@@ -160,12 +172,8 @@ function myProductCardHTML(product) {
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-seller">Listed by <strong>You</strong></span>
-        <div class="card-actions">
-          <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id}, this)">
-            <i class="fa-solid fa-trash"></i> Remove
-          </button>
-        </div>
+        <span class="card-seller">by <strong>${escHtml(vendorName)}</strong></span>
+        <div class="card-actions">${ownerActions}</div>
       </div>
     </div>`;
 }
@@ -291,12 +299,21 @@ function renderFarmerCrops(crops) {
 
 // ── Single Farmer Crop Card ──────────────────────────────────
 function farmerCropCardHTML(crop) {
-  const currentUser = getUser() || {};
-  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
-  const isOwner = normalize(crop.phone) === normalize(currentUser.phone);
+  const isOwner = isCurrentUserOwner(crop.phone);
   const displayName = isOwner
     ? 'Posted by you'
     : crop.farmer_name || crop.vendor_name || 'Unknown';
+  const contactButton = isOwner
+    ? ''
+    : `<button class="btn btn-primary btn-sm"
+            onclick='showContactModal({
+              name: "${escJs(displayName)}",
+              phone: "${escJs(crop.phone)}",
+              role: "Farmer",
+              itemName: "${escJs(crop.crop_name)}"
+            })'>
+            <i class="fa-solid fa-phone"></i> Contact
+          </button>`;
 
   return `
     <div class="listing-card card-farmer">
@@ -338,17 +355,7 @@ function farmerCropCardHTML(crop) {
 
       <div class="card-footer">
         <span class="card-seller">by <strong>${escHtml(displayName)}</strong></span>
-        <div class="card-actions">
-          <button class="btn btn-primary btn-sm"
-            onclick='showContactModal({
-              name: "${escJs(displayName)}",
-              phone: "${escJs(crop.phone)}",
-              role: "Farmer",
-              itemName: "${escJs(crop.crop_name)}"
-            })'>
-            <i class="fa-solid fa-phone"></i> Contact
-          </button>
-        </div>
+        <div class="card-actions">${contactButton}</div>
       </div>
     </div>`;
 }
