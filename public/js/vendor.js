@@ -287,12 +287,12 @@ function renderFarmerCrops(crops) {
 
 // ── Single Farmer Crop Card ──────────────────────────────────
 function farmerCropCardHTML(crop) {
-  const currentUser = getUser();
-
-  const name =
-    crop.phone === currentUser.phone
-      ? "Posted by you"
-      : crop.farmer_name || crop.phone || "Unknown";
+  const currentUser = getUser() || {};
+  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
+  const isOwner = normalize(crop.phone) === normalize(currentUser.phone);
+  const displayName = isOwner
+    ? 'Posted by you'
+    : crop.farmer_name || crop.vendor_name || 'Unknown';
 
   return `
     <div class="listing-card card-farmer">
@@ -321,7 +321,7 @@ function farmerCropCardHTML(crop) {
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-tractor"></i></span>
             <span class="meta-label">Farmer</span>
-            <span class="meta-value">${escHtml(name)}</span>
+            <span class="meta-value">${escHtml(displayName)}</span>
           </div>
 
           <div class="meta-row">
@@ -333,12 +333,11 @@ function farmerCropCardHTML(crop) {
       </div>
 
       <div class="card-footer">
-        <span class="card-seller">by <strong>${escHtml(name)}</strong></span>
-
+        <span class="card-seller">by <strong>${escHtml(displayName)}</strong></span>
         <div class="card-actions">
           <button class="btn btn-primary btn-sm"
             onclick='showContactModal({
-              name: "${escJs(name)}",
+              name: "${escJs(displayName)}",
               phone: "${escJs(crop.phone)}",
               role: "Farmer",
               itemName: "${escJs(crop.crop_name)}"

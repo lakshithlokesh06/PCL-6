@@ -174,7 +174,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setButtonLoading(btn, true);
 
-    const result = await apiRequest('/crops', 'POST', { crop_name: cropName, quantity, price_per_kg, location, phone });
+    const result = await apiRequest('/crops', 'POST', {
+      crop_name: cropName,
+      quantity,
+      price_per_kg,
+      location,
+      phone,
+      farmer_name: getUser()?.full_name || ''
+    });
 
     setButtonLoading(btn, false, '<i class="fa-solid fa-wheat-awn"></i> Post Crop');
 
@@ -274,12 +281,12 @@ function renderVendorProducts(products) {
 
 // ── Single Vendor Product Card ───────────────────────────────
 function vendorProductCardHTML(product) {
-  const currentUser = getUser();
-
-  const ownerName =
-    product.phone === currentUser.phone
-      ? "Posted by you"
-      : product.vendor_name || "Unknown Vendor";
+  const currentUser = getUser() || {};
+  const normalize = (p) => (p || '').replace(/\D/g, '').slice(-10);
+  const isOwner = normalize(product.phone) === normalize(currentUser.phone);
+  const displayName = isOwner
+    ? 'Posted by you'
+    : product.vendor_name || product.farmer_name || 'Unknown';
 
   const desc = product.description
     ? `<div class="meta-row"><span class="meta-icon"><i class="fa-solid fa-file-lines"></i></span><span class="meta-label">Details</span><span class="meta-value" style="font-size:0.82rem; font-weight:400;">${escHtml(product.description.substring(0, 80))}${product.description.length > 80 ? '…' : ''}</span></div>`
@@ -304,7 +311,7 @@ function vendorProductCardHTML(product) {
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-store"></i></span>
             <span class="meta-label">Vendor</span>
-            <span class="meta-value">${escHtml(ownerName)}</span>
+            <span class="meta-value">${escHtml(displayName)}</span>
           </div>
           <div class="meta-row">
             <span class="meta-icon"><i class="fa-solid fa-calendar-days"></i></span>
@@ -314,11 +321,11 @@ function vendorProductCardHTML(product) {
         </div>
       </div>
       <div class="card-footer">
-        <span class="card-seller">by <strong>${escHtml(ownerName)}</strong></span>
+        <span class="card-seller">by <strong>${escHtml(displayName)}</strong></span>
         <div class="card-actions">
           <button class="btn btn-primary btn-sm"
             onclick='showContactModal({
-              name: "${escJs(ownerName)}",
+              name: "${escJs(displayName)}",
               phone: "${escJs(product.phone)}",
               role: "Vendor",
               itemName: "${escJs(product.product_name)}"

@@ -137,8 +137,8 @@ app.post('/api/crops', async (req, res) => {
 
   try {
     await pool.query(
-      `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone, farmer_name )
-       VALUES ($1,$2,$3,$4,$5,$5)`,
+      `INSERT INTO crops (crop_name, quantity, price_per_kg, location, phone, farmer_name)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
       [crop_name, quantity, price_per_kg, location, phone, farmer_name]
     );
 
