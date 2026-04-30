@@ -86,9 +86,13 @@ app.post('/api/login', async (req, res) => {
   const { phone, password } = req.body;
 
   try {
+    const normalizedPhone = String(phone || '').replace(/\D/g, '').slice(-10);
     const result = await pool.query(
-      'SELECT * FROM users WHERE phone=$1',
-      [phone]
+      `SELECT *
+       FROM users
+       WHERE RIGHT(REGEXP_REPLACE(TRIM(phone), '\\D', '', 'g'), 10) = $1
+       LIMIT 1`,
+      [normalizedPhone]
     );
 
     const user = result.rows[0];
